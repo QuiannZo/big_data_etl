@@ -1,0 +1,30 @@
+# --- ARCHIVOS PYTHON ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# --- ENTORNOS ---
+.env
+*.env
+
+# --- DIRECTORIOS DE COMPILACIÓN O TEMPORALES ---
+build/
+dist/
+*.egg-info/
+
+# --- ARCHIVOS DEL EDITOR ---
+.vscode/
+.idea/
+
+# --- LOGS ---
+*.log
+
+# --- CARPETA DE DATOS ---
+# Ignora todo el contenido de data/, pero permite que la carpeta exista
+data/*
+!data/.gitkeep
+
+# --- CSVs EN CUALQUIER LUGAR ---
+*.csv
