@@ -22,9 +22,10 @@ dist/
 *.log
 
 # --- CARPETA DE DATOS ---
-# Ignora todo el contenido de data/, pero permite que la carpeta exista
-data/*
-!data/.gitkeep
+# PERMITIR ARCHIVOS .gitkeep PARA QUE SE PUEDAN COMMITTEAR LOS FOLDERS VACÍOS
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/analytics/.gitkeep
 
 # --- CSVs EN CUALQUIER LUGAR ---
 *.csv
