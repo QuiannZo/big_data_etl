@@ -1,0 +1,31 @@
+# --- ARCHIVOS PYTHON ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# --- ENTORNOS ---
+.env
+*.env
+
+# --- DIRECTORIOS DE COMPILACIÓN O TEMPORALES ---
+build/
+dist/
+*.egg-info/
+
+# --- ARCHIVOS DEL EDITOR ---
+.vscode/
+.idea/
+
+# --- LOGS ---
+*.log
+
+# --- CARPETA DE DATOS ---
+# PERMITIR ARCHIVOS .gitkeep PARA QUE SE PUEDAN COMMITTEAR LOS FOLDERS VACÍOS
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/analytics/.gitkeep
+
+# --- CSVs EN CUALQUIER LUGAR ---
+*.csv

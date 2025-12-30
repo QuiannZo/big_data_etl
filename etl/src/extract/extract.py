@@ -5,7 +5,10 @@ Extrae datos de la API del IADB o genera datos de ejemplo
 import requests
 import pandas as pd
 import numpy as np
-from config import RAW_DIR, COUNTRIES
+import json
+import traceback
+from http import HTTPStatus
+from config import RAW_DIR, COUNTRIES, ALLOWED_NAMES, FIELDS, YEARS
 
 def generar_datos_ejemplo():
     """Genera datos sintéticos para demostración"""
@@ -108,37 +111,79 @@ def extraer_datos_iadb():
         print("\nIntentando conectar a IADB API...")
         url = "https://data.iadb.org/api/3/action/package_show"
         params = {'id': 'social-indicators-of-latin-america-and-the-caribbean'}
-        
-        response = requests.get(url, params=params, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('success'):
-                print("✓ API conectada")
-                resources = data['result'].get('resources', [])
-                print(f"  Recursos disponibles: {len(resources)}")
+        csv_resources = get_resources(url, params)
                 
-                # Intentar descargar primer CSV
-                csv_resources = [r for r in resources if r.get('format', '').lower() == 'csv']
-                
-                if csv_resources:
-                    print(f"\n  Descargando primer CSV...")
-                    csv_url = csv_resources[0]['url']
-                    df = pd.read_csv(csv_url)
-                    df.to_csv(RAW_DIR / 'iadb_data.csv', index=False)
-                    print(f"  ✓ Descargado: {len(df)} filas")
-                    print("\n✓ Datos reales del IADB descargados")
-                    return {'iadb': df}
-                else:
-                    print("  ⚠ No se encontraron archivos CSV")
-                    raise Exception("No CSV disponible")
-        else:
-            raise Exception(f"API respondió con status {response.status_code}")
+        if csv_resources:
+            for resource in csv_resources:
+                df = get_data_from_api(resource['id'], limit=10000, filters=create_filter(year=2022))
+                filename = resource['name'].replace(' ', '').lower()
+                df.to_csv(RAW_DIR / f"{filename}.csv", index=False)
+            return {'filename': df}
             
     except Exception as e:
-        print(f"\n⚠ No se pudo conectar a IADB API: {e}")
+        print(f"\nNo se pudo conectar a IADB API: {e} {traceback.extract_tb(e.__traceback__)[-1].lineno}")
         print("  Generando datos de ejemplo en su lugar...\n")
         return generar_datos_ejemplo()
+    
+def get_resources(url: str, params: dict[str, str]) -> list[dict[str, any]]:
+    response = requests.get(url, params=params)
+
+    if response.status_code >= HTTPStatus.OK and response.status_code < HTTPStatus.BAD_REQUEST:
+        has_succeeded = response.json()['success']
+        if has_succeeded:
+            result = response.json()['result']
+            resources = []
+            for r in result['resources']:
+                if r['is_indicator'] \
+                   and r['name'] in ALLOWED_NAMES \
+                   and r['format'].lower() == 'csv':
+                    resources.append({'id': r['id'], 'name': r['name']})
+            print(f"Number of resources: {len(resources)}")
+            return resources
+        else:
+            raise Exception("No se encontraron archivos CSV")
+    else:
+        raise Exception(f"Error accessing API. Code {response.status_code}")
+
+    
+def get_data_from_api(resource_id: str, limit: int = 1000, filters: list[dict[str, str]] = []):
+    filter_str = parse_filter(filters)
+    sort = "year%20desc"
+
+    url = f"https://data.iadb.org/api/action/datastore_search?resource_id={resource_id}&limit={limit}&filters={filter_str}&distinct=True&include_total=False&sort={sort}"
+    response = requests.get(url)
+
+    if response.status_code >= HTTPStatus.OK and response.status_code < HTTPStatus.BAD_REQUEST:
+        result = response.json().get('result')
+        data = pd.DataFrame(result['records'])[FIELDS]
+        print(f"Download {resource_id} completed successfully")
+        data = data[data['isoalpha3'].isin(COUNTRIES)]
+        data = data[data['year'].isin(YEARS)]
+        data.rename(columns={'isoalpha3': 'country_code'}, inplace=True)
+        return data
+    else:
+        raise Exception(f"Code {response.status_code}: {response.text}")
+    
+def parse_filter(filters: list[dict[str, str]] = []) -> str:
+    filter_str = "%7B"
+    for f in filters:
+        key, value = next(iter(f.items()))
+        if isinstance(value, str):
+            value = f"%22{value}%22"
+        filter_str += f"%22{key}%22%3A{value}%2C"
+    filter_str = filter_str[:-3]
+    filter_str += "%7D"
+    return filter_str
+    
+def create_filter(year: int) -> list[dict[str, str]]:
+    filters = [{'education_level': 'Total'}
+             , {'ethnicity': 'Total'}
+             , {'language': 'Total'}
+             , {'disability': 'Total'}
+             , {'migration': 'Total'}
+             , {'management': 'Total'}
+             , {'quintile': 'Total'}]
+    return filters
 
 if __name__ == '__main__':
     datos = extraer_datos_iadb()

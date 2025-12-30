@@ -26,7 +26,7 @@ def calcular_kpis():
     print("Calculando KPI 1: Promedios por País...")
     kpi1 = df.groupby('country_code').agg({
         'country_name': 'first',
-        **{col: 'mean' for col in df.columns if col not in ['country_code', 'country_name', 'year']}
+        **{col: 'mean' for col in df.columns if col in ['meanscoreinmathematics(pisa)', 'meanscoreinreading(pisa)', 'meanscoreinscience(pisa)']}
     }).round(2).reset_index()
     
     kpi1.to_csv(ANALYTICS_DIR / 'kpi_promedios_pais.csv', index=False)
@@ -36,7 +36,7 @@ def calcular_kpis():
     # KPI 2: Evolución Temporal
     print("Calculando KPI 2: Evolución Temporal...")
     kpi2 = df.groupby('year').agg({
-        col: 'mean' for col in df.columns if col not in ['country_code', 'country_name', 'year']
+        col: 'mean' for col in df.columns if col in ['meanscoreinmathematics(pisa)', 'meanscoreinreading(pisa)', 'meanscoreinscience(pisa)']
     }).round(2).reset_index()
     
     kpi2.to_csv(ANALYTICS_DIR / 'kpi_evolucion_temporal.csv', index=False)

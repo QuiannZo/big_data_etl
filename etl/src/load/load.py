@@ -5,6 +5,7 @@ Carga datos procesados y KPIs a la base de datos
 import pandas as pd
 from sqlalchemy import create_engine, text
 from config import DATABASE_URL, PROCESSED_DIR, ANALYTICS_DIR
+import time
 
 def cargar_a_postgres():
     """Carga todos los CSVs a PostgreSQL"""
@@ -17,6 +18,7 @@ def cargar_a_postgres():
     print(f"  URL: {DATABASE_URL.split('@')[1]}")  # Ocultar password
     
     try:
+        time.sleep(5)
         engine = create_engine(DATABASE_URL)
         
         # Test conexión

@@ -20,7 +20,7 @@ for dir_path in [RAW_DIR, PROCESSED_DIR, ANALYTICS_DIR]:
     dir_path.mkdir(parents=True, exist_ok=True)
 
 # PostgreSQL
-DB_HOST = os.getenv('DB_HOST', 'localhost')
+DB_HOST = os.getenv('DB_HOST', '172.20.0.3')
 DB_PORT = os.getenv('DB_PORT', '5432')
 DB_NAME = os.getenv('DB_NAME', 'iadb_data')
 DB_USER = os.getenv('DB_USER', 'postgres')
@@ -48,6 +48,27 @@ COUNTRIES_MAP = {
     'PER': 'Perú',
     'URY': 'Uruguay'
 }
+
+ALLOWED_NAMES = [
+    "Percentage of the population in poverty",
+    "Early school dropout rate",
+    "Gross attendance rate primary education",
+    "Gross attendance rate secondary education",
+    "Gross attendance rate tertiary education",
+    "Mean score in science (PISA)",
+    "Mean score in reading (PISA)",
+    "Mean score in mathematics (PISA)",
+    "Percentage with access to schools with internet"
+]
+
+YEARS = [
+    "2019",
+    "2020",
+    "2021",
+    "2022"
+]
+
+FIELDS = ['year', 'isoalpha3', 'area', 'value', 'sex']
 
 print("✓ Configuración cargada")
 print(f"  Base de datos: {DB_NAME} @ {DB_HOST}")

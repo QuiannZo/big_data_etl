@@ -1,0 +1,39 @@
+services:
+  app:
+    build: ./etl
+    depends_on:
+      - db
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "443:443"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    networks:
+      app_network:
+        ipv4_address: 172.20.0.2
+  
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=iadb_data
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      app_network:
+        ipv4_address: 172.20.0.3
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

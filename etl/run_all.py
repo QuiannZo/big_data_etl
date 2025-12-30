@@ -3,6 +3,7 @@ EJECUTAR TODO EL PIPELINE
 Ejecuta todos los pasos en orden
 """
 from datetime import datetime
+import importlib
 import sys
 
 def run_pipeline():
@@ -14,7 +15,6 @@ def run_pipeline():
     try:
         # Paso 1: Extracción
         print("\n>>> EJECUTANDO PASO 1: EXTRACCIÓN")
-        import importlib
         extract = importlib.import_module('src.extract.extract')
         extract.extraer_datos_iadb()
         
